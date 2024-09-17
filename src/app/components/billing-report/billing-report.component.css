@@ -1,0 +1,50 @@
+nz-range-picker {
+    margin: 8px 25px 8px 0;
+  }
+
+  .pill-container {
+    display: flex;
+    align-items: center;
+    border-radius: 20px; /* Rounded corners for the pill shape */
+    background-color: white; /* Background color for the pill */
+    padding: 5px; /* Add padding to create space inside the pill */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: shadow for better visibility */
+    margin: 5px 5px 0 0;
+  }
+  
+  .pill-container .ant-radio-group {
+    display: flex;
+  }
+
+  .pill-container i {
+    font-size: 16px; /* Icon size */
+  }
+  
+  .pill-container > div {
+    display: flex;
+    flex-direction: column; /* Stack label and value vertically */
+    margin-left: 8px; /* Space between icon and text */
+  }
+  
+  .pill-container span {
+    font-weight: bold; /* Make label text bold */
+  }
+  
+  .pill-container p {
+    margin: 0; /* Remove default margin for paragraphs */
+    color: #333; /* Adjust color as needed */
+  }
+
+  /* Custom styles for the table */
+.custom-table thead th {
+  font-size: 12px; /* Set font size for header */
+  background-color: #1890ff; /* Primary blue color */
+  color: white; /* Text color to be white */
+  text-align: center; /* Center align text */
+  padding: 8px 8px; 
+}
+
+/* Optional: Style for table rows and cells */
+.custom-table tbody td {
+  font-size: 14px; /* Adjust font size for table cells if needed */
+}

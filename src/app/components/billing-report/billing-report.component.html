@@ -1,0 +1,153 @@
+<nz-layout>
+  <!-- Header Section -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <!-- Billing Reports Heading -->
+    <h2 style="margin: 0;">Billing Reports</h2>
+
+    <!-- Pills and View Mode -->
+    <div style="display: flex; align-items: center;">
+      <!-- Dates Shown Pill -->
+      <div class="pill-container" style="background-color: rgb(248, 229, 231); display: flex; align-items: center; padding: 5px 10px; border-radius: 25px;">
+        <div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background-color: #ff8c8c; color: white; margin-right: 8px;">
+          <i class="material-icons" style="font-size: 16px;">calendar_today</i>
+        </div>
+        <div>
+          <span>Dates Shown:</span>
+          <p *ngIf="filterForm.get('timeFrame')?.value !== 'dateRange'">
+            {{ filterForm.get('timeFrameDatePicker')?.value | date: 'yyyy/MM/dd' || 'Select a date' }}
+          </p>
+          <p *ngIf="filterForm.get('timeFrame')?.value === 'dateRange'">
+            {{ filterForm.get('customRange.startDate')?.value | date: 'yyyy/MM/dd' }} -
+            {{ filterForm.get('customRange.endDate')?.value | date: 'yyyy/MM/dd' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Total Balance Pill -->
+      <div class="pill-container" style="background-color: rgb(210, 242, 210); display: flex; align-items: center; padding: 5px 10px; border-radius: 25px; margin-left: 10px;">
+        <div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background-color: #52c41a; color: white; margin-right: 8px;">
+          <i class="material-icons" style="font-size: 16px;">attach_money</i>
+        </div>
+        <div>
+          <span>Total Balance:</span>
+          <p>{{ getTotalBalance() | currency }}</p>
+        </div>
+      </div>
+
+      <!-- View Mode Radio Buttons -->
+      <div class="pill-container" style="margin-left: 10px;">
+        <nz-radio-group [(ngModel)]="viewMode" (ngModelChange)="onViewModeChange($event)">
+          <label nz-radio nzValue="tabular">Tabular</label>
+          <label nz-radio nzValue="chart">Chart</label>
+        </nz-radio-group>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <nz-content style="display: flex;">
+    <!-- Filters Sidebar -->
+    <div style="width: 300px; margin-right: 20px;">
+      <div style="border: 1px solid #d9d9d9; border-radius: 5%; background-color: #f5f5f5;">
+        <!-- Card Title (Filters Header) -->
+        <div style="background-color: #1890ff; color: white; padding: 10px; border-radius: 5px;">
+          <h3 style="margin: 0;">Filters</h3>
+        </div>
+
+        <!-- Card Body -->
+        <form nz-form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+        <div style="padding: 20px;">
+          <!-- Time Frame Filter -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24">Time Frame</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-radio-group>
+                <label nz-radio nzValue="single" style="display: flex; margin-right: 20px;">
+                  <nz-space>
+                    <nz-select *nzSpaceItem formControlName="timeFrame" style="margin-bottom: 10px;">
+                      <nz-option nzValue="date" nzLabel="Date"></nz-option>
+                      <nz-option nzValue="week" nzLabel="Week"></nz-option>
+                      <nz-option nzValue="month" nzLabel="Month"></nz-option>
+                      <nz-option nzValue="quarter" nzLabel="Quarter"></nz-option>
+                      <nz-option nzValue="year" nzLabel="Year"></nz-option>
+                    </nz-select>
+                    <nz-date-picker formControlName="timeFrameDatePicker" *nzSpaceItem [nzMode]="mode" ></nz-date-picker>
+                  </nz-space>
+                </label>
+                <label nz-radio nzValue="dateRange">
+                  <nz-range-picker formControlName="customRange" [nzFormat]="dateFormat"></nz-range-picker>
+                </label>
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Locations Filter -->
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24">Locations</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select 
+              nzMode="multiple"
+              nzPlaceHolder="Please select"
+              formControlName="locations">
+                <nz-option *ngFor="let item of filterLocations" [nzLabel]="item" [nzValue]="item"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <!-- Apply Filters Button -->
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button type="submit" nzType="primary" style="width: 100%;">Apply Filters</button>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </form>
+    </div>
+    </div>
+
+    <!-- Main Content (Billing Report Table or Chart) -->
+    <div style="flex: 1; padding: 20px; background-color: #fff; border-radius: 10px; margin-top: 40px;">
+      <!-- Export section aligned to the right -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+        <span style="margin-right: 10px;">Export to</span>
+        <button nz-button nzType="default" (click)="exportChartToPDF()" nzTooltip="Export Chart to PDF" style="display: flex; align-items: center; margin-right: 10px; background: none; border: none; padding: 0;">
+          <i class="material-icons" style="color: #ff4d4f; font-size: 20px;">picture_as_pdf</i>
+        </button>
+        <button nz-button nzType="default" (click)="exportTableToExcel()" nzTooltip="Export Table to Excel" style="display: flex; align-items: center; background: none; border: none; padding: 0;">
+          <i class="material-icons" style="color: #52c41a; font-size: 20px;">insert_chart</i>
+        </button>
+      </div>
+
+      <!-- Tabular View -->
+      <div *ngIf="viewMode === 'tabular'">
+        <nz-table [nzData]="filteredReports" [nzBordered]="true" class="custom-table">
+          <thead>
+            <tr>
+              <th nzWidth="20%">Patient First Name</th>
+              <th nzWidth="20%">Patient Last Name</th>
+              <th nzWidth="20%">Transaction Date</th>
+              <th nzWidth="20%">Patient MRN</th>
+              <th nzWidth="10%">Encounter#</th>
+              <th nzWidth="10%">Date of Birth</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of filteredReports">
+              <td>{{ report.patientFirstname }}</td>
+              <td>{{ report.patientLastname }}</td>
+              <td>{{ report.transactionDate }}</td>
+              <td>{{ report.patientMRN }}</td>
+              <td>{{ report.encounter }}</td>
+              <td>{{ report.dob }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+
+      <!-- Chart View -->
+      <div *ngIf="viewMode === 'chart'" style="flex: 1; padding: 20px;">
+        <ag-charts [options]="options"></ag-charts>
+      </div>
+    </div>
+  </nz-content>
+</nz-layout>
